@@ -11,11 +11,12 @@
   </p>
   <h2 align="center">
     <p>CVPR 2025</p>
-    <a href="https://arxiv.org/pdf/2504.20040" align="center">Paper</a> 
+    <a href="https://arxiv.org/pdf/2504.20040" align="center">Paper</a> |
     <!-- |  -->
     <!-- <a href="missing" align="center">Demo 🤗</a> |  -->
     <!-- <a href="missing" align="center">Colab</a> | -->
-    <!-- <a href="missing" align="center">Video</a> -->
+    <a href="https://www.youtube.com/watch?v=Kl4l5fXBUkM&ab_channel=ZadorPataki" align="center">Video</a>
+
   </h2>
   
 <!-- </p>
@@ -45,7 +46,7 @@ MP-SfM is a Structure-from-Motion pipeline that integrates monocular depth and n
 - 🛠️ [Pipeline Configurations](#pipeline-configurations) — Customize your pipeline with OmegaConf configs.
 - 📈 [Extending MP-SfM: Use Your Own Priors](#extending-mp-sfm-use-your-own-priors) — Integrate your own depth, normal, or matching modules.
 
-# Setup
+## Setup
 
 <!-- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](missing) -->
 
@@ -81,7 +82,7 @@ python -m pip install -e .
 </details>
 
 
-# Execution
+## Execution
 Our [demo notebook](demo.ipynb) demonstrates a minimal usage example. It shows how to run the MP-SfM pipeline, and how to visualize the reconstruction with its multiple output modalities.
 <p align="center">
     <a href=""><img src="assets/demo.gif" alt="example" width=70%></a> 
@@ -161,7 +162,7 @@ Check out our example [data directory](local/example).
 
 </details>
 
-# Pipeline configurations
+## Configuration
 <p align="center">
     <a href=""><img src="assets/pipeline.png" alt="example" width=100%></a> 
     <br>
@@ -223,7 +224,7 @@ triangulator:
 
 </details>
 
-## Our favorite configurations
+### Our favorite configurations
 
 - [sp-lg_m3dv2](configs/sp-lg_m3dv2.yaml) ⚡️ (default): Fastest reconstruction with very precise camera poses. Failure cases only in scenes with little texture or very challenging viewpoint changes
 - [sp-mast3r](configs/sp-mast3r.yaml) 💪: Robust reconstruction even in egregious viewpoint changes and very low overlap. Thanks to anchoring matches around Superpoint keypoints, reconstruction is also precise. 
@@ -232,7 +233,7 @@ triangulator:
 
 Below, we detail the benefits of the key priors we recommend, in case the user wants to mix the configurations.  
 
-## Selecting your Matcher
+### Image matching
 Check out the available [feature extraction](mpsfm/extraction/imagewise/features/models/configs) and [matching](mpsfm/extraction/pairwise/models/configs) configurations. 
 Our default pipeline is built on top of [Superpoint](mpsfm/extraction/imagewise/features/models/configs/superpoint.yaml)+[LightGlue](mpsfm/extraction/pairwise/models/configs/superpoint+lightglue.yaml). However, using additional computational resources, we can get improved accuracies on low overlap scenes using dense matchers. Our pipeline supports three matching modes (`sparse`, `dense`, `sparse+dense`). See our [demo](demo.ipynb) for more details.
 
@@ -250,13 +251,13 @@ We recommend using `sparse` or `sparse+dense`:
 
 </details>
 
-## Selecting your Monocular Surface Priors
+### Monocular Surface Priors
 Our leverages [depth and normal estimators](mpsfm/extraction/imagewise/geometry/models/configs)  and their corresponding uncertainties. We carefully calibrated uncertainties per depth estimator. We found that uncertainties estimated by the network (where applicable) and modeling uncertainties proportional to the depth estimates was reliable (see [per-estimator setups](configs/defaults)).
 
 <details>
 <summary><b>[Configuration Recommendations - click to expand]</b></summary>
 
-### Depth Estimators
+#### Depth estimation
 - Metric3Dv2:
   - [Giant2](mpsfm/extraction/imagewise/geometry/models/configs/metric3dv2.yaml) (our default): Great generalizable estimates 💥, at the cost of extraction speed and GPU memory
   - [Large](mpsfm/extraction/imagewise/geometry/models/configs/metric3dv2-large.yaml) maintains performance against  Giant 💪 in many scenarios while significantly improving extraction speed. [Small](mpsfm/extraction/imagewise/geometry/models/configs/metric3dv2-small.yaml) provides very fast ⚡️ extraction, and performs sufficiently well in easy scenarios
@@ -264,7 +265,7 @@ Our leverages [depth and normal estimators](mpsfm/extraction/imagewise/geometry/
 - [DepthAnythingV2](mpsfm/extraction/imagewise/geometry/models/configs/depthanythingv2-outdoor.yaml): Reasonable performance in small scale environments
 - [MASt3R](mpsfm/extraction/pairwise/models/configs/mats3r.yaml): estimates depth maps using two input views. As a result, achieves the best performance 💥 at extracting relative scales between background and foreground objects; critical in some low-overlap scenarios
 
-### Normal Estimators
+#### Normal estimation
 - Metric3Dv2:
   - [Giant2](mpsfm/extraction/imagewise/geometry/models/configs/metric3dv2.yaml) (our default): Our best performing normal extractor 💥. However, introduces a considerable overhead when used in combination with a different depth estimator
   - [Small](mpsfm/extraction/imagewise/geometry/models/configs/metric3dv2-small.yaml) & [Large](mpsfm/extraction/imagewise/geometry/models/configs/metric3dv2-large.yaml) improves extraction speeds, however, their quality is largely under explored
@@ -272,21 +273,21 @@ Our leverages [depth and normal estimators](mpsfm/extraction/imagewise/geometry/
 
 </details>
 
-# Extending MP-SfM: Use Your Own Priors
+## Extending MP-SfM: use your own priors
 
 Our extractors follow the [hloc](https://github.com/cvg/Hierarchical-Localization) format. Thus, MP-SfM can easily be extended with improvements in monocular surface estimators with minimal effort. Monocular surface prior improvements (surface and uncertainty predictions) will facilitate more robust reconstruction qualities in the most challenging scenarios. Moreover, the pipeline could greatly benefit from improved matchers capable of rejecting negative pairs.
 
 <details>
 <summary><b>[Configuration Recommendations - click to expand]</b></summary>
 
-### Sparse Matchers
+### Sparse matching
 
 - We [extract](mpsfm/extraction/imagewise/features/base.py) and [match sparse features](mpsfm/extraction/pairwise/match_sparse.py) using hloc modules (see [feature configs](mpsfm/extraction/imagewise/features/models/configs) and [matcher configs](mpsfm/extraction/pairwise/models/configs))
 - Follow the structure presented in [superpoint](mpsfm/extraction/imagewise/features/models/superpoint.py) to add your own matcher
 - Follow the structure presented in [lightglue](mpsfm/extraction/pairwise/models/lightglue.py) to add your own matcher
 
 
-### Dense matchers
+### Dense matching
 
 - Our [dense matching framework](mpsfm/extraction/pairwise/match_dense_2view.py) with accompanying [config files](mpsfm/extraction/pairwise/models/configs) can match both [salient features](mpsfm/extraction/imagewise/features/base.py) and sample matches on featureless regions. 
 - We support two types of dense feature matchers. Both of which interpolate predictions around salient features to match them. Follow the corresponding structures:

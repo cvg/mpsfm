@@ -1,5 +1,5 @@
 torch 
-torchvision
+torchvision --index-url https://download.pytorch.org/whl/cu121
 omegaconf
 h5py
 tqdm
