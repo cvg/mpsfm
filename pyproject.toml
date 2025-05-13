@@ -3,6 +3,14 @@ name = "mpsfm"
 version = "0.1.0"
 authors = [{ name = "Zador Pataki", email = "zadorpataki14@gmail.com" }]
 requires-python = ">=3.9"
+dependencies = [
+    "timm>=1.0.15,<2",
+    "cupy-cuda12x>=13.4.1,<14",
+    "cholespy>=2.1.0,<3",
+    "html4vision>=0.5.0,<0.6",
+    "geffnet>=1.0.2,<2",
+    "mmcv-lite>=2.2.0,<3",
+]
 
 [tool.setuptools]
 packages = ["mpsfm"]
@@ -24,3 +32,111 @@ line-length = 119
 exclude = '''
 /third_party
 '''
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.pypi-options]
+index-strategy = "unsafe-best-match"
+
+[tool.pixi.pypi-dependencies]
+mpsfm = { path = ".", editable = true }
+torch = { version = ">=2.7.0", index = "https://download.pytorch.org/whl/cu128" }
+torchvision = { version = ">=0.20.1", index = "https://download.pytorch.org/whl/cu128" }
+xformers = { version = "*", index = "https://download.pytorch.org/whl/cu128" }
+simplecv = { git = "https://github.com/pablovela5620/simplecv.git", rev = "0446594fd8ead3c8fa9f46b983b0a93a920e5258" }
+lightglue = { git = "https://github.com/cvg/LightGlue" }
+
+
+[tool.pixi.tasks]
+post-install = { cmd = "pwd", depends-on = ["_install-pycolmap"] }
+reconstruct-example = { cmd = "python reconstruct.py", depends-on = [
+    "post-install",
+] }
+
+[tool.pixi.tasks._clone-colmap]
+cmd = """
+test -e "colmap"
+|| (
+    git clone git@github.com:Zador-Pataki/colmap.git
+   )
+"""
+cwd = "third_party"
+
+[tool.pixi.tasks._build-colmap]
+cmd = """
+    rm -rf build && \
+    mkdir build && \
+    cd build && \
+    cmake .. -GNinja -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX && \
+    ninja && \
+    ninja install
+"""
+cwd = "third_party/colmap"
+inputs = [
+    "third_party/colmap/src/**",
+    "third_party/colmap/lib/**",
+    "third_party/colmap/CMakeLists.txt",
+    "third_party/colmap/cmake/**",
+    "third_party/colmap/setup.py",       # setup.py is in the colmap root
+]
+outputs = [
+    "third_party/colmap/build/.ninja_deps",
+    "third_party/colmap/build/.ninja_log",
+]
+
+depends-on = ["_clone-colmap"]
+
+[tool.pixi.tasks._install-pycolmap]
+cmd = """
+    python -m pip install -e .
+"""
+cwd = "third_party/colmap"
+inputs = [
+    "third_party/colmap/setup.py",
+    "third_party/colmap/pycolmap/**",
+    "third_party/colmap/CMakeLists.txt", # pycolmap's setup might reference this
+]
+outputs = ["third_party/colmap/pycolmap.egg-info/PKG-INFO"]
+depends-on = ["_build-colmap"]
+
+[tool.pixi.dependencies]
+rerun-sdk = ">=0.23.1,<0.24"
+omegaconf = ">=2.3.0,<3"
+h5py = ">=3.13.0,<4"
+tqdm = ">=4.67.1,<5"
+py-opencv = ">=4.11.0,<5"
+scipy = ">=1.15.2,<2"
+matplotlib = ">=3.10.1,<4"
+plotly = ">=6.0.1,<7"
+nbformat = ">=5.10.4,<6"
+ipywidgets = ">=8.1.6,<9"
+gdown = ">=5.2.0,<6"
+plyfile = ">=1.1,<2"
+onnxruntime = ">=1.20.1,<2"
+einops = ">=0.8.1,<0.9"
+python = "==3.11"
+pyceres = ">=2.4,<3"
+cmake = ">=3.30.5,<4"
+make = ">=4.4.1,<5"
+pkg-config = ">=0.29.2,<0.30"
+ninja = ">=1.12.1,<2"
+libgomp = ">=14.2.0,<15"
+eigen = ">=3.4.0,<4"
+libblas = ">=3.9.0,<4"
+libcblas = ">=3.9.0,<4"
+suitesparse = ">=7.8.3,<8"
+ceres-solver = ">=2.2.0,<3"
+libboost-devel = ">=1.86.0,<2"
+glog = ">=0.7.1,<0.8"
+cgal-cpp = ">=6.0.1,<7"
+freeimage = ">=3.18.0,<4"
+sqlite = ">=3.47.0,<4"
+gflags = ">=2.2.2,<3"
+wget = ">=1.21.4,<2"
+unzip = ">=6.0,<7"
+flann = ">=1.9.2,<2"
+libglu = ">=9.0.3,<10"
+pip = ">=25.1.1,<26"
+jupyterlab = ">=4.4.2,<5"
