@@ -47,7 +47,6 @@ torchvision = { version = ">=0.20.1", index = "https://download.pytorch.org/whl/
 xformers = { version = "*", index = "https://download.pytorch.org/whl/cu128" }
 simplecv = { git = "https://github.com/pablovela5620/simplecv.git", rev = "0446594fd8ead3c8fa9f46b983b0a93a920e5258" }
 lightglue = { git = "https://github.com/cvg/LightGlue" }
-colmap-rerun = { path = "../colmap-rerun", editable = true }
 
 
 [tool.pixi.tasks]
