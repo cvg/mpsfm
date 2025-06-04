@@ -142,6 +142,7 @@ python reconstruct.py \
     --conf sp-lg_m3dv2 \ # see config dir "configs" for other curated options
     --data_dir local/example \ # hosts sfm inputs and outputs when other options aren't specified 
     --intrinsics_path local/example/intrinsics.yaml \ # path to the intrinsics file 
+    --refrec_dir local/example/refrec \ # (optional) alternatively inheret intrinsics from a colmap reconstruction
     --images_dir local/example/images \ # images directory
     --cache_dir local/example/cache_dir \ # extraction outputs: depths, normals, matches, etc.
     --extract \ # use ["sky", "features", "matches", "depth", "normals"] to force re-extract
@@ -202,6 +203,48 @@ Check out our example [data directory](local/example).
   
   </details>
 
+  Alternatively, you can inherit intrinsics from an existing  COLMAP reconstruction by setting `--refrec_dir`. The `points3D.bin` file can be empty, and the images in `images.bin` only need to reference the correct `camera_id`. **Note**: Setting `--refrec_dir` will override your  `--intrinsics` input. 
+  <details>
+  <summary><b>[Reconstruction dir example - click to expand]</b></summary>
+
+  Run this python script with your own reconstruction directory to see if your reconstruction contains everything necessary. 
+  ```python
+  import pycolmap
+  rec = pycolmap.Reconstruction("local/example/refrec")
+  print(rec.cameras)
+  # Output: CameraMap{1: Camera(camera_id=1, model=PINHOLE, width=1393, height=793, params=[604.324, 604.667, 696.5, 396.5] (fx, fy, cx, cy))}
+  print({id: (image.name, image.camera_id) for id, image in rec.images.items()})
+  # Output: {6: ('indoor_DSC02882.JPG', 1), 5: ('indoor_DSC02912.JPG', 1), 4: ('indoor_DSC02868.JPG', 1), ...
+  ```
+  </details>
+</details>
+
+<details>
+<summary><b>[Reconstruction using fixed extrinsics - click to expand]</b></summary>
+
+By adding the `--extrinsics` flag, MP-SfM will inherit and freeze both the extrinsics and intrinsics from an existing COLMAP reconstruction specified via `--refrec_dir`. 3D points will be triangulated, and depth maps will be refined. 
+
+Run the example reconstruction from the command line:
+```bash
+python reconstruct.py --refrec_dir local/example/refrec --extrinsics -v 1
+```
+**Note**: All other default options are handled by `argparse`.
+<details>
+  <summary><b>[Reconstruction dir example - click to expand]</b></summary>
+
+  Run this python script with your own reconstruction directory to see if your reconstruction contains everything necessary. 
+  ```python
+  import pycolmap
+  rec = pycolmap.Reconstruction("local/example/refrec")
+  print(rec.cameras)
+  # Output: CameraMap{1: Camera(camera_id=1, model=PINHOLE, width=1393, height=793, params=[604.324, 604.667, 696.5, 396.5] (fx, fy, cx, cy))}
+  print({id: (image.name, image.camera_id) for id, image in rec.images.items()})
+  # Output: {6: ('indoor_DSC02882.JPG', 1), 5: ('indoor_DSC02912.JPG', 1), 4: ('indoor_DSC02868.JPG', 1), ...
+
+  # Check if all images have valid poses
+  assert all(image.has_pose for image in rec.images.values())
+  ```
+  </details>
 </details>
 
 ## Configuration
