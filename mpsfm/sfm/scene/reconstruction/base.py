@@ -66,6 +66,14 @@ class MpsfmReconstruction(BaseClass, ColmapReconstructionWrapper, Reconstruction
         self._rec = rec
         self._images = {imid: rec.images[imid] for imid in rec.images}
         self._cameras = {camid: rec.cameras[camid] for camid in rec.cameras}
+        
+    def inheret_poses(self, rec):
+        """Inherits poses from another reconstruction."""
+        for id, image in self.images.items():
+            assert image.name == rec.images[id].name, \
+                f"Image {id} name mismatch: {image.name} != {rec.images[id].name}"
+            image.cam_from_world = rec.images[id].cam_from_world
+            self.register_image(id)
 
     def add_camera(self, camera):
         self.rec.add_camera(camera)

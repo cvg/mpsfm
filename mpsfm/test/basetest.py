@@ -37,7 +37,7 @@ class BaseTest:
         "overwrite": False,
         "terminate": False,
         "reconstruction_manager": {
-            "incremental_mapper": {
+            "mapper": {
                 "dataset": {},
             }
         },

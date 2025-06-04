@@ -9,7 +9,7 @@ class SimpleTest(BaseClass):
     """SimpleTest class for reconstructing a user input testset."""
 
     dataset = SimpleDataset
-    default_conf = {"dataset": {"name": "simple"}}
+    default_conf = {}
     freeze_conf = False
 
     def __call__(
@@ -21,6 +21,7 @@ class SimpleTest(BaseClass):
         refrec_dir=None,
         cache_dir=None,
         images_dir=None,
+        extrinsics=False,
     ):
         data_dir = Path(data_dir)
 
@@ -32,10 +33,8 @@ class SimpleTest(BaseClass):
             refrec_dir=refrec_dir,
             rgb_dir=images_dir,
         )
-
         if cache_dir is None:
             cache_dir = data_dir / "cache_dir"
-
         self.reconstruction_manager = ReconstructionManager(self.conf)
         init_info = dict(
             references=scene_parser.imnames,
@@ -43,5 +42,6 @@ class SimpleTest(BaseClass):
             cache_dir=cache_dir,
             ref_imids=list(scene_parser.rec.images.keys()),
             scene_parser=scene_parser,
+            extrinsics=extrinsics,
         )
         return self.reconstruction_manager(**init_info)

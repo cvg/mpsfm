@@ -400,8 +400,7 @@ class MpsfmMapper(BaseClass):
             param_multiplier=self.conf.final_robustification if self.conf.final_robustification is not None else 1,
             final=True,
         )
-        if self.conf.verbose:
-            self.visualization()
+        
         if self.conf.verbose > 1:
             print(50 * "-")
             print("Reconstruction Desc")
@@ -832,6 +831,35 @@ class MpsfmMapper(BaseClass):
         fig = self.mpsfm_rec.vis_depth_maps(self.scene_parser.rgb_dir)
         fig = self.mpsfm_rec.vis_cameras(fig)
         fig = self.mpsfm_rec.vis_colmap_points(fig)
-        fn = Path(self.sfm_outputs_dir / "3d.html")
+        outfile = self.sfm_outputs_dir / "3d.html"
+        self.log(f"Saving plotly visualization to {outfile}")
+        fn = Path(outfile)
         fn.parent.mkdir(parents=True, exist_ok=True)
         fig.write_html(fn)
+
+
+class MpsfmRefiner(MpsfmMapper):
+    """Triangulator+refiner class for MP-SfM."""
+
+    def __call__(self, **kwargs):
+        self.mpsfm_rec.inheret_poses(self.scene_parser.rec)
+        for imid in self.mpsfm_rec.images:
+            self.registration.triangulate_image(imid)
+        bundle = self.find_global_bundle()
+        shift_scale = {}
+        for imid in self.mpsfm_rec.images:
+            bundle["ref_id"] = imid
+            update, _ =  self.optimizer.optimize_prior_shiftscale(bundle)     
+            shift_scale |= update
+        self.mpsfm_rec.rescale_all(shift_scale)
+        self.mpsfm_rec.activate_depths(bundle["optim_ids"])
+        # trinauglation again -- depth maps influence triangulation
+        for imid in self.mpsfm_rec.images:
+            self.registration.triangulate_image(imid)
+        self.filter_all()
+        bundle = self.find_global_bundle()
+        self.optimizer.calculate_point_covs(bundle)
+        if not self.integrate_bundle(bundle["optim_ids"]):
+                print("Failed to integrate bundle")
+                return None, False
+        return self.mpsfm_rec, True

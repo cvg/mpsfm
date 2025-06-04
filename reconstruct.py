@@ -19,12 +19,17 @@ parser.add_argument("--cache_dir", type=str, default=None, help="Path to cache d
 parser.add_argument("-e", "--extract", nargs="*", type=str, default=[], help="List of priors to force reextract")
 parser.add_argument("-c", "--conf", type=str, help="Name of the sfm config file", default="sp-lg_m3dv2")
 parser.add_argument("-v", "--verbose", type=int, default=0)
+parser.add_argument(
+    "--extrinsics",
+    action="store_true",
+    help="If set, will use extrinsics from the reference reconstruction."
+    "Pipeline will only triangulate points and refine depth maps.",
+)
 
 args, _ = parser.parse_known_args()
 conf = load_cfg(gvars.SFM_CONFIG_DIR / f"{args.conf}.yaml", return_name=False)
 conf.extract = args.extract
 conf.verbose = args.verbose
-
 experiment = SimpleTest(conf)
 mpsfm_rec = experiment(
     imnames=args.imnames,
@@ -33,6 +38,7 @@ mpsfm_rec = experiment(
     cache_dir=args.cache_dir,
     data_dir=args.data_dir,
     images_dir=args.images_dir,
+    extrinsics=args.extrinsics,
 )
 sfm_outputs_dir = Path(args.data_dir) / "sfm_outputs"
 sfm_outputs_dir.mkdir(exist_ok=True)

@@ -1,5 +1,5 @@
 """Module containing the MP-SfM mapper class."""
 
-from .base import MpsfmMapper
+from .base import MpsfmMapper, MpsfmRefiner
 
-__all__ = ["MpsfmMapper"]
+__all__ = ["MpsfmMapper", "MpsfmRefiner"]
