@@ -1,0 +1,5 @@
+#instead of metric3dv2 dpeth, we use mogev2 
+defaults:
+  - defaults/mogev2 # see mpsfm/sfm/configs/defaults/mogev2.yaml
+  - defaults/mast3r # see mpsfm/sfm/configs/defaults/mast3r.yaml
+matches_mode: sparse
