@@ -61,7 +61,13 @@ class Extraction(BaseClass):
         scene_parser=None,
         references=None,
         extract=None,
+        masks=None,
+        feature_masks=None,
     ):
+        if feature_masks is None:
+            feature_masks = []
+        if masks is None:
+            masks = []
         if isinstance(conf, dict):
             conf = OmegaConf.create(conf)
         self.conf = OmegaConf.merge(self.default_conf, conf)
@@ -87,6 +93,8 @@ class Extraction(BaseClass):
         if extract is None:
             extract = set()
         self.extract = extract
+        self.masks = masks
+        self.feature_masks = feature_masks
 
     def extract_sparse(self, overwrite=False):
         """Extract sparse features."""
@@ -287,13 +295,15 @@ class Extraction(BaseClass):
         self.models[skyseg_conf.name] = model
         self.log(f"Sky segmentation located in {self.skyseg_dir}", level=1)
 
-    def extract_masks(self, masks, overwrite=False):
+    def extract_masks(self, overwrite=False):
         """Extract masks."""
+        masks = set(self.masks + self.feature_masks)
         print(f"Extracting {masks} masks...")
-        self.masks_dirs = []
+        self.masks_dirs = {}
         for mask in masks:
+            assert mask not in self.masks_dirs, f"Mask {mask} already extracted."
             if mask == "sky":
                 self.extract_sky_mask(overwrite=overwrite)
-                self.masks_dirs.append(self.skyseg_dir)
+                self.masks_dirs[mask] = self.skyseg_dir
             else:
                 raise NotImplementedError

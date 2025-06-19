@@ -44,6 +44,7 @@ class MpsfmMapper(BaseClass):
         "matches_mode": "sparse",  # sparse, dense, both combine with +
         "pairs_type": "retrieval",
         "masks": ["sky"],  # sky
+        "feature_masks": [],  # list of masks to use for feature extraction
         "extractors": {**Extraction.default_conf},
         "extract": [],
         # depth consistency
@@ -136,6 +137,8 @@ class MpsfmMapper(BaseClass):
             sfm_outputs_dir=self.sfm_outputs_dir,
             references=references,
             extract=self.conf.extract,
+            masks=self.conf.masks,
+            feature_masks=self.conf.feature_masks,
         )
 
         if self.conf.pairs_type == "retrieval":
@@ -148,8 +151,7 @@ class MpsfmMapper(BaseClass):
         else:
             self.extractor.extract_mono()
 
-        if len(self.conf.masks) > 0:
-            self.extractor.extract_masks(self.conf.masks)
+        self.extractor.extract_masks()
 
         if extract_only:
             return

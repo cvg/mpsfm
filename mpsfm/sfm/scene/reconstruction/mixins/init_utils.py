@@ -59,7 +59,7 @@ class InitUtils:
                 kps=self.keypoints(imid),
                 depth_dir=extraction_obj.depth_dir,
                 normals_dir=extraction_obj.normals_dir,
-                masks_path=extraction_obj.masks_dirs,
+                masks_path=[extraction_obj.masks_dirs[mask] for mask in extraction_obj.masks],
                 **kwargs,
             )
         return True

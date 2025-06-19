@@ -1,6 +1,7 @@
 from copy import deepcopy
 from itertools import chain
 
+import cv2
 import numpy as np
 import pycolmap
 
@@ -76,6 +77,25 @@ class Correspondences(BaseClass, ColmapCorrespondenceGraphWrapper):
             )
         else:
             raise ValueError(f"Unknown matcher type: {matcher_conf.type}")
+
+        if len(self.extractor.feature_masks) > 0:
+            mask_paths = [self.extractor.masks_dirs[mask] for mask in self.extractor.feature_masks]
+            name_to_id = {im.name: id for id, im in self.mpsfm_rec.images.items()}
+            im_masks = {imid: im.load_masks_data(mask_paths) for imid, im in self.mpsfm_rec.images.items()}
+            masks_kps = {}
+            for image in self.mpsfm_rec.images.values():
+                imname = image.name
+                id_ = name_to_id[imname]
+                mask = im_masks[id_]
+                mask = cv2.resize(mask.astype(float), (image.camera.width, image.camera.height)).astype(bool)
+                kps = keypoints[imname].round().astype(np.int32)
+                masks_kps[imname] = mask[kps[:, 1], kps[:, 0]]
+            for imA, imB in matches:
+                m_kpsA, m_kpsB = masks_kps[imA], masks_kps[imB]
+                matches_ = matches[(imA, imB)]
+                m_matches = m_kpsA[matches_[:, 0]] & m_kpsB[matches_[:, 1]]
+                matches[(imA, imB)] = matches[(imA, imB)][m_matches]
+                scores[frozenset((imA, imB))] = scores[frozenset((imA, imB))][m_matches]
         return keypoints, matches, scores, sparse_im_masks
 
     def gather_matches_scores(self, inlier_masks, scores, matches_set):

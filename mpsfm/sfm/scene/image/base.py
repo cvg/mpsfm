@@ -79,7 +79,6 @@ class Image(ColmapImageWrapper, BaseClass, Integration):
         self.normals_dir = None
         self.imid = None
         self.mpsfm_rec = None
-        self.imname = None
         self.image = None
         self.masks_path = None
         self.depth = None
@@ -92,7 +91,6 @@ class Image(ColmapImageWrapper, BaseClass, Integration):
         self.normals_dir = normals_dir
         self.imid = imid
         self.mpsfm_rec = mpsfm_rec
-        self.imname = self.mpsfm_rec.images[self.imid].name
         self.image = self.mpsfm_rec.images[self.imid]
         self.masks_path = masks_path
 
@@ -117,21 +115,23 @@ class Image(ColmapImageWrapper, BaseClass, Integration):
     def load_depth_data(self, pairs_pth=None, **kwargs):
         """Load depth data from depth directory."""
         if "mast3r" in self.depth_dir.name:
-            depth_dict = get_mono_map_from_pairs(self.depth_dir, self.imname, pairs_pth)
+            depth_dict = get_mono_map_from_pairs(self.depth_dir, self.name, pairs_pth)
         else:
-            depth_dict = get_mono_map(self.depth_dir, self.imname)
+            depth_dict = get_mono_map(self.depth_dir, self.name)
         return depth_dict
 
     def load_normals_data(self):
         """Load normals data from normals directory."""
-        normals_dict = get_mono_map(self.normals_dir, self.imname)
+        normals_dict = get_mono_map(self.normals_dir, self.name)
         return normals_dict
 
-    def load_masks_data(self):
+    def load_masks_data(self, masks_path=None):
         """Load mask data from mask directory."""
+        if masks_path is None:
+            masks_path = self.masks_path
         masks = []
-        for mask_path in self.masks_path:
-            masks.append(get_mask(mask_path, self.imname))
+        for mask_path in masks_path:
+            masks.append(get_mask(mask_path, self.name))
         mask = np.prod(masks, axis=0) if len(masks) > 0 else None
         return mask
 
