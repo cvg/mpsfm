@@ -42,3 +42,5 @@ pillow_heif
 # Contributing
 black 
 ruff
+
+moge @ git+https://github.com/microsoft/MoGe.git

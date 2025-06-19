@@ -1,0 +1,14 @@
+extractors:
+  depth: mogev2
+  normals: mogev2
+  matcher: mast3r
+reconstruction:
+  image:
+    depth:
+      depth_uncertainty: 0.079
+      prior_uncertainty: false
+    normals:
+      prior_uncertainty: false
+      flip_consistency: true
+matches_mode: sparse+depth
+ 

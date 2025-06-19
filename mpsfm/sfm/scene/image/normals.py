@@ -195,10 +195,16 @@ class Normals(BaseClass, PriorUtils):
             self.data /= np.linalg.norm(self.data, axis=-1, keepdims=True)
             self.data_downscaled = (d1 + d2) / 2
             self.data_downscaled /= np.linalg.norm(self.data_downscaled, axis=-1, keepdims=True)
-            var1 = normals_dict["normals_variance"]
-            vard1 = dv1
-            var2 = normals_dict["normals2_variance"]
-            vard2 = dv2
+            if self.conf.prior_uncertainty:
+                var1 = normals_dict["normals_variance"]
+                vard1 = dv1
+                var2 = normals_dict.get("normals2_variance", None)
+                vard2 = dv2
+            else:
+                var1 = None
+                vard1 = None
+                var2 = None
+                vard2 = None
             self.uncertainty = two_view_covariance(
                 normals_dict["normals"],
                 normals_dict["normals2"],

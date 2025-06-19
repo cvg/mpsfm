@@ -1,0 +1,10 @@
+dataset:
+    return_types:
+        - "image"
+model:
+    name: mogev2
+    return_types: 
+        - depth
+        - normals
+        - valid
+    scale: 1

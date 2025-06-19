@@ -1,0 +1,3 @@
+#instead of metric3dv2 dpeth, we use mogev2 
+defaults:
+  - defaults/mogev2 # see mpsfm/sfm/configs/defaults/mogev2.yaml
