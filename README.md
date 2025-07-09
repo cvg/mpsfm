@@ -375,7 +375,7 @@ python scripts/benchmark.py \
   -d eth3d \ # (default) benchmark dataset
   -m minimal \ # overlap level [/leq5/leq10/leq30/all]
   -s facade \ # scene [/courtyard/electro/...]
-  --testset_id 0 \ # id of an ovelrap level (in this case minimal)
+  --testset_id 0 # id of an ovelrap level (in this case minimal)
 ```
 
 

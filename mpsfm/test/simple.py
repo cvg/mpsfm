@@ -23,6 +23,8 @@ class SimpleTest(BaseClass):
         images_dir=None,
     ):
         data_dir = Path(data_dir)
+        cache_dir = Path(cache_dir) if cache_dir is not None else None
+        images_dir = Path(images_dir) if images_dir is not None else None
 
         scene_parser = SimpleParser(
             data_dir=data_dir,
